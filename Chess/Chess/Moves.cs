@@ -47,18 +47,54 @@ namespace Chess
                     return CanStraightMove();
                 case Figure.whiteRook:
                 case Figure.blackRook:
-                    return false;
+                    return (fm.SignX == 0 || fm.SignY == 0) && CanStraightMove();
                 case Figure.whiteBishop:
                 case Figure.blackBishop:
-                    return false;
+                    return (fm.SignX != 0 && fm.SignY != 0) && CanStraightMove();
                 case Figure.whiteKnight:
                 case Figure.blackKnight:
                     return CanKnightMove();
                 case Figure.whitePawn:
                 case Figure.blackPawn:
-                    return false;
+                    return CanPawnMove();
                 default: return false;
             }
+        }
+
+        private bool CanPawnMove()
+        {
+            if (fm.from.y < 1 || fm.from.y > 6) return false;
+            int stepY = fm.figure.GetColor() == Color.white ? 1 : -1;
+            return CanPawnGo(stepY) || CanPawnJump(stepY) || CanPawnEat(stepY);
+        }
+
+        private bool CanPawnEat(int stepY)
+        {
+            if (board.GetFigureAt(fm.to) != Figure.none)
+                if (fm.AbsDeltaX == 1)
+                    if (fm.DeltaY == stepY)
+                        return true;
+            return false;
+        }
+
+        private bool CanPawnJump(int stepY)
+        {
+            if (board.GetFigureAt(fm.to) == Figure.none)
+                if (fm.DeltaX == 0)
+                    if (fm.DeltaY == 2 * stepY)
+                        if (fm.from.y == 1 || fm.from.y == 6)
+                            if (board.GetFigureAt(new Square(fm.from.x, fm.from.y)) == Figure.none)
+                                return true;
+            return false;
+        }
+
+        private bool CanPawnGo(int stepY)
+        {
+            if (board.GetFigureAt(fm.to) == Figure.none)
+                if (fm.DeltaX == 0)
+                    if (fm.DeltaY == stepY)
+                        return true;
+            return false;
         }
 
         private bool CanStraightMove()

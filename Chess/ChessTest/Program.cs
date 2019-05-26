@@ -11,13 +11,22 @@ namespace ChessTest
     {
         static void Main(string[] args)
         {
-            Chess.Chess chess = new Chess.Chess();
+            Random random = new Random();
+            Chess.Chess chess = new Chess.Chess("rnbqkbnr/1p1111p1/8/8/8/8/1P1111P1/RNBQKBNR w KQkq - 0 1");
+            List<string> list;
             while (true)
             {
+                list = chess.GetAllMoves();
                 Console.WriteLine(chess.fen);
                 Print(ChessToASCII(chess));
+                Console.WriteLine(chess.IsCheck() ? "CHECK" : "-");
+                foreach (string moves in list)
+                    Console.Write(moves + "\t");
+                Console.WriteLine();
+                Console.Write("> ");
                 string move = Console.ReadLine();
-                if (move == "") break;
+                if (move == "q") break;
+                if (move == "") move = list[random.Next(list.Count)];
                 chess = chess.Move(move);
             }
         }
@@ -34,7 +43,7 @@ namespace ChessTest
                 text += "|\n";
             }
             text += "  +----------------+\n";
-            text += "   a b c d e f g h\n";
+            text += "    a b c d e f g h\n";
             return text;
         }
 

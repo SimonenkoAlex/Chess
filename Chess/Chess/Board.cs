@@ -64,6 +64,13 @@ namespace Chess
             return sb.ToString();
         }
 
+        public IEnumerable<FigureOnSquare> YieldFigure()
+        {
+            foreach (Square square in Square.YieldSquares())
+                if (GetFigureAt(square).GetColor() == moveColor)
+                    yield return new FigureOnSquare(GetFigureAt(square), square);
+        }
+
         public Figure GetFigureAt(Square square)
         {
             if (square.OnBoard()) return figures[square.x, square.y];
@@ -84,6 +91,39 @@ namespace Chess
             next.moveColor = moveColor.FlipColor();
             next.GenerateFEN();
             return next;
+        }
+
+        public bool IsCheck()
+        {
+            Board after = new Board(fen);
+            after.moveColor = moveColor.FlipColor();
+            return after.CanEatKing();
+        }
+
+        private bool CanEatKing()
+        {
+            Square badKing = FindBadKing();
+            Moves moves = new Moves(this);
+            foreach (FigureOnSquare fs in YieldFigure())
+            {
+                FigureMoving fm = new FigureMoving(fs, badKing);
+                if (moves.CanMove(fm)) return true;
+            }
+            return false;
+        }
+
+        private Square FindBadKing()
+        {
+            Figure badKing = moveColor == Color.black ? Figure.whiteKing : Figure.blackKing;
+            foreach (Square square in Square.YieldSquares())
+                if (GetFigureAt(square) == badKing) return square;
+            return Square.none;
+        }
+
+        public bool IsCheckAfterMove(FigureMoving fm)
+        {
+            Board after = Move(fm);
+            return after.CanEatKing();
         }
     }
 }

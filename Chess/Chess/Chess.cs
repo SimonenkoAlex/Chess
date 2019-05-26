@@ -13,6 +13,7 @@ namespace Chess
         public string fen { get; private set; }
         Board board;
         Moves moves;
+        List<FigureMoving> allMoves;
 
         /// <summary>
         /// 
@@ -46,6 +47,33 @@ namespace Chess
             Square square = new Square(x, y);
             Figure f = board.GetFigureAt(square);
             return f == Figure.none ? '.' : (char)f;
+        }
+
+        void FindAllMoves()
+        {
+            allMoves = new List<FigureMoving>();
+            foreach (FigureOnSquare fs in board.YieldFigure())
+                foreach (Square to in Square.YieldSquares())
+                {
+                    FigureMoving fm = new FigureMoving(fs, to);
+                    if (moves.CanMove(fm))
+                        if (!board.IsCheckAfterMove(fm))
+                            allMoves.Add(fm);
+                }
+        }
+
+        public List<string> GetAllMoves()
+        {
+            FindAllMoves();
+            List<string> list = new List<string>();
+            foreach (FigureMoving fm in allMoves)
+                list.Add(fm.ToString());
+            return list;
+        }
+
+        public bool IsCheck()
+        {
+            return board.IsCheck();
         }
     }
 }
